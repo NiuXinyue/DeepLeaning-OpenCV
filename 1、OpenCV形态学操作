@@ -1,0 +1,6 @@
+一、形态学操作
+    1、什么是形态学操作：
+        形态学操作是基于形状的一系列图像处理操作，包括膨胀（dilate）、腐蚀(erode)、二值化(binary)、闭操作(cv2.MORPH_CLOSE)、开操作(cv2.MORPH_OPEN)、顶帽操作（cv2.MORPH_TOPHAT）、黑帽操作（cv2.MORPH_BLACKHAT）、
+       梯度操作（cv2.MORPH_GRADIENT）
+    2、膨胀操作:
+        ①步骤：创建膨胀核（有点像池化反向传播），将膨胀核中的最大像素值赋值给其他像素  
