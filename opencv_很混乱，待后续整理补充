@@ -1,329 +1,1415 @@
+
+
+
+
 #一、Sobel滤波器：计算像素梯度
-	1、sobel作用：索贝尔算子主要用作边缘检测。在技术上，它是一离散性差分算子，用来运算图像亮度函数的梯度之近似值。在图像的任何一点使用此算子，将会产生对应的梯度矢量或是其法矢量。
-  
-  2、如何计算梯度幅值和方向：
-        Gx = [-1, 0, +1]
-             [-2, 0, +2]
-             [-1, 0, +1]
 
-        Gy =  [-1, -2, -1]
-              [0,   0,  0]
-              [+1, +2, +1]
+	1、sobel的作用：索贝尔算子主要用作边缘检测。在技术上，它是一离散性差分算子，用来运算图像亮度函数的梯度之近似值。在图像的任何一点使用此算子，将会产生对应的梯度矢量或是其法矢量。
+
+	
+
+	2、缺点：对噪点具有平滑抑制作用，得到的边缘粗糙
+
+	Gx = [-1, 0, +1]
+
+    	 [-2, 0, +2]
+
+         [-1, 0, +1]
+
+       
+
+     Gy =   [-1, -2, -1]
+
+     		[0, 0, 0]
+
+            [+1, +2, +1]
+
+            
+
+      计算梯度幅值和方向：
+
       梯度：G = (Gx **2 + Gy **2) ** 0.5
-      方向：theta = arctan(Gy/Gx)
-      
-   3、缺点：对噪点具有平滑抑制作用，得到的边缘粗糙
 
-   4、代码：
-      laplacian = cv2.Laplacian(frame, cv2.CV_64F)
-      sobelx = cv2.Sobel(frame, cv2.CV_64F, 1, 0, ksize=5)
-      sobely = cv2.Sobel(frame, cv2.CV_64F, 0, 1, ksize=5)
-      cv2.imshow("sobelx", sobelx)
-      cv2.imshow("sobely", sobely)
-      cv2.imshow("laplacian", laplacian)
-      类似的算法：cv2.Scharr()
+      方向：theta = arctan(Gy/Gx)
+
+      
+
+	  3、代码：
+
+	    laplacian = cv2.Laplacian(frame, cv2.CV_64F)
+
+		sobelx = cv2.Sobel(frame, cv2.CV_64F, 1, 0, ksize=5)
+
+		sobely = cv2.Sobel(frame, cv2.CV_64F, 0, 1, ksize=5)
+
+		cv2.Scharr(frame, 1,)
+
+		cv2.imshow("sobelx", sobelx)
+
+		cv2.imshow("sobely", sobely)
+
+		cv2.imshow("laplacian", laplacian)
+
+      类似的算法：Scharr()
+
+
 
 #二、图像金字塔：
-	1、高斯金字塔：
-        模糊（可用于图像拼接）
-        API：
-            cv2.pyrDown()\cv2.pyrUp()
-  
-  2、拉普拉斯锐化金字塔：
-        用于找回原始丢掉的数据
-  
-  3、公式如下：
-        Li = Gi -cv2.pyrDown(G(i+1))
-        
+
+	1、高斯金字塔：先模糊（图像拼接）而后使用cv2.pyrDown()\cv2.pyrUp()
+
+    2、拉普拉斯锐化金字塔：用于找回原始丢掉的数据
+
+   	Li = Gi -cv2.pyrDown(G(i+1))
+
 #三、算法：
+
     1、canny算法：
+
+        使用步骤:
+
         转灰度图
+
         高斯滤波
+
         计算图像梯度，根据梯度计算边缘幅值和角度
+
         非极大值抑制：用于瘦边，梯度垂直边缘，仅仅基于梯度值提取的便于那仍然很模糊，非极大值一直价则可以帮助将局部最大值之外的所有梯度值抑制为零
+
         （非极大值抑制：步骤
+
             将当前像素的梯度与沿正负梯度方向上的连个像素进行比较!
+
             如果当前像素强度与另外两个像素相比最大，则该像素点保留为边缘点，否则该像素点将被抑制）
-        双阈值边缘链接处理
+
+        双阈值边缘链接处理（ 
+
         二值化图像输出结果 
+
 	2、增强对比度：
-        cv2.convertScaleAbs()
-     
-#四、轮廓
-##（一）、轮廓提取
-	  1、转灰度图cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    cv2.convertScaleAbs()
+
     
+
+    
+
+#四、API
+
+	1、增强对比度：
+
+    cv2.convertScaleAbs()
+
+    
+
+    2、Sobel
+
+    cv2.Sobel()
+
+    cv2.Scharr()
+
+       
+
+#五、轮廓
+
+##（一）、轮廓
+
+	1、转灰度图cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
     2、转二值图cv2.threshold(imggray, 0, 255, cv2.THRESH_OSTU|cv2.THRESH_BINARY)
-    
-    3、提取轮廓cv2.findContours(binary, cv2.PETR_TREE, )
-    
-    4、刻画轮廓 cv2.drawContours(img, contours, 1, (0, 255, 0), 3)
-    
+
+    3、找轮廓cv2.findContours(binary, cv2.PETR_TREE, )
+
+    4、轮廓特征 cv2.draw(img, contours, 1, (0, 255, 0), 3)——参数
+
     5、API：
-      ①、参数：cv2.findContours(寻找轮廓的图像，
-                检索模式：cv2.PETR_EXTERNAL只检测外轮廓、cv2.PETR_LIST检测的轮廓不建立等级关系、cv2.PETR_CCOMP建立两个等级的轮廓（上一层为外边界，里面一层为内轮廓的边界信息，如果内孔内还有一个连通物体，这个物体的边界也在顶层。    cv2.RETR_TREE建立一个等级树结构的轮廓）
-                          轮廓近似办法：cv2.CHAIN_APPROX_SIMPLE存储所有的轮廓点，相邻的兰格点的像素位置不超过1（max（abs（x1-x2），abs（y2-y1））==1）、 cv2.CHAIN_APPROX_SIMPLE压缩水平方向，垂直方向，对角线方向的元素，只保留该方向的终点坐标，例如一个矩形轮廓只需4个点来保存轮廓信息)
-      ②、返回值：一个是轮廓本身，其次是每条轮廓的的属性
+
+    参数：cv2.findContours(寻找轮廓的图像，
+
+    					检索模式：cv2.PETR_EXTERNAL只检测外轮廓、cv2.PETR_LIST检测的轮廓不建立等级关系、cv2.PETR_CCOMP建立两个等级的轮廓（上一层为外边界，里面一层为内轮廓的边界信息，如果内孔内还有一个连通物体，这个物体的边界也在顶层。    cv2.RETR_TREE建立一个等级树结构的轮廓）
+
+                        轮廓近似办法：cv2.CHAIN_APPROX_SIMPLE存储所有的轮廓点，相邻的兰格点的像素位置不超过1（max（abs（x1-x2），abs（y2-y1））==1）、 cv2.CHAIN_APPROX_SIMPLE压缩水平方向，垂直方向，对角线方向的元素，只保留该方向的终点坐标，例如一个矩形轮廓只需4个点来保存轮廓信息)
+
+	返回值：一个是轮廓本身，其次是每条轮廓的赢得属性
+
     
+
     
+
     #计算面积、周长、中心位置
+
     #创建矩
+
     M = cv2.moments(contour[0])
+
     #矩阵重心
+
     cx, cy = int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"])
-    #轮廓面积
+
+    
+
     area = cv2.contourArea(contour[0])
-    #轮廓周长
+
     length  =cv2.arcLength(contour[0], True)
+
 ##（二）、轮廓近似
+
 	epsilon:大体轮廓距离实际轮廓的距离
+
 	1、cv2.approxPolyDp(contours[0], epsilon, True)
+
     img1 = cv2.imread("6.jpg", 1)
+
 i = 0
+
 while video.isOpened():
+
     img = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+
     ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU|cv2.THRESH_BINARY)
+
     
+
     #寻找轮廓点
+
     contour, tem = cv2.findContours(img, cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+
     
+
     #找到逼近轮廓的点的位置
+
     approx = cv2.approxPolyDP(contour[0], epsilon=30, closed=False)
+
     img_contour = cv2.drawContours(img1, [approx], -1, (255, 255, 0), 3)
+
     # print(approx)
+
     cv2.imshow("approx", img_contour)
+
     
+
     #判断是否是凸起
+
     hull = cv2.convexHull(contours[0])
+
     cv2.isContourConvex(contour[0], cv2.isContourvex(hull))
+
 ##（三）、边界检测
+
 	
+
 	1、边界矩形
+
     最小矩形
+
     最小外切圆
+
     最小椭圆
+
     
+
     #最小椭圆
+
     cntour, tem = cv2.findContour(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     imgellipse = cv2.fitEllipse(contour[0])
+
     cv2.ellipse(img1, imgellipse, color = (255, 0, 0),thickness=2)
+
     
+
     #最小直线
+
      h, w, _ = img1.shape
+
     [vx, vy, x, y] = cv2.fitLine(contour[0], cv2.DIST_L2,0,0.01, 0.01 )
+
     lefty = int((-x  * vy /vx) + y)
+
     rightly = int((w - x) * vy / vx+ y)
+
     cv2.line(img1, (w -1, rightly), (0, lefty), (255, 255, 0), 2)
+
     
+
     2、轮廓性质：
+
     ①边界矩形的宽高比
+
     Aspect Ratio = $$$Width/Height$$$
+
     x, y, w, h = cv2.boundingRect(cnt)
+
     aspect_ratio = float(w) / h
+
     
+
     ②轮廓面积与边界矩形面积的比
+
     Extent = Object Area/Bounding Rectangle Area
+
     area = cv2.contourArea(cont)
+
     x, y, w, h = cv2.boundingRect(cnt)
+
     rect_area = w*h
+
     extent = float(area) /rect_area
+
     
+
     3、轮廓匹配
+
     ①contour, hierarchy = cv2.findContours(binary, 2, 1)
+
 	com_res = cv2.mathshapes(contour1[0], contour2[0], 1, 0.0)  #当两个图片完全相同时返回0，最大返回值为1
+
 	②代码：
+
 	    img1 = cv2.resize(img1, (400, 800))
+
     img2 = cv2.resize(img2, (400, 800))
+
     img1_ = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+
     img2_ = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
+
+
     contour1, _ = cv2.findContours(img1_, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     contour2, _ = cv2.findContours(img2_, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+
+
     result = cv2.matchShapes(contour1[0], contour2[0], 2, 0)
+
     result1 = cv2.matchShapes(img1_, img2_, 2, 0)
+
     print(result, result1)
+
     cv2.imshow("img1", img1_)
+
     cv2.imshow("img2", img2_)
+
 	
+
     
+
 ##（一）、双边阈值处理
+
 ![da761330e99f07ea68f6b2003cf52fa.png](.\images\da761330e99f07ea68f6b2003cf52fa.png)
 
+
+
 #六、Hough变换
+
 	1、作用：用来检测任意能够用数学公式表达的形状（现实情况中曲线不一定由公式而来
+
 	2、代码：
+
 	#获取圆的属性：中心点坐标，直径
+
 	circles = cv2.HoughCircles(dst, cv2.HOUGH_GRADIENT, dp=1, minDist=30, param1=40, param2=20, minRadius=20, maxRadius=300)
+
 	#获取直线属性：交点坐标和角度
+
 	lines = cv2.HoughLines(edges, 1, np.pi/180, 100)
-	！[](![120991f1f17a93b28f779feaf28e8dd.png](.\images\120991f1f17a93b28f779feaf28e8dd.png)
-  ![9260544fb06b96bf8824460682ecdd3.png](.\images\9260544fb06b96bf8824460682ecdd3.png)
+
+	！[](
+
+![120991f1f17a93b28f779feaf28e8dd.png](.\images\120991f1f17a93b28f779feaf28e8dd.png)
+
+
+
+
+
+![9260544fb06b96bf8824460682ecdd3.png](.\images\9260544fb06b96bf8824460682ecdd3.png)
+
+
+
+
 
 #七、直方图
-1、2D直方图（待补充）：
+
+1、2D直方图：
+
 	一般使用HSV格式，cv2.COLOR_BGR2HSV
 
+
+
+
+
 #八、分水岭算法
+
 	1、图像距离转换，距离边缘cv2.distanceTransform()	
+
 	距离转换图像，其中dst每个像素的值为其到最近的背景像素（灰度值为0）的距离，可以看到硬币的中心像素值最大（中心离背景像素最远）。对其进行二值处理就得到了分离的前景图（下面中间的图），白色区域肯定是硬币区域，而且还相互分离，下面右边的图为之前的膨胀图减去中间这个表示前景的图。
 
 
-#九、欧拉放大
-  import cv2
-  import numpy as np
-  import scipy.fftpack as fftpack
 
-  #####---------------------------------欧拉放大
-  ###### Build Gaussian Pyramid
-  def build_gaussian_pyramid(src, level=3):
-      s = src.copy()
-      pyramid = [s]
-      for i in range(level):
-          s = cv2.pyrDown(s)
-          pyramid.append(s)
-      return pyramid
+
+
+#九、欧拉放大import cv2
+
+import numpy as np
+
+import scipy.fftpack as fftpack
+
+
+
+
+
+#####---------------------------------欧拉放大
+
+###### Build Gaussian Pyramid
+
+def build_gaussian_pyramid(src, level=3):
+
+    s = src.copy()
+
+    pyramid = [s]
+
+    for i in range(level):
+
+        s = cv2.pyrDown(s)
+
+        pyramid.append(s)
+
+    return pyramid
+
+
+
 
 
 ###### load video from file
+
 def load_video(video_filename):
+
     #捕获视频
+
     cap = cv2.VideoCapture(video_filename)
+
     #？？？？？？？？？
+
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
     width, height = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
     fps = int(cap.get(cv2.CAP_PROP_FPS))
+
     #帧、宽、高
+
     video_tensor = np.zeros((frame_count, height, width, 3), dtype='float')
+
     x = 0
+
     while cap.isOpened():
+
         ret, frame = cap.read()
+
         if ret is True:
+
             video_tensor[x] = frame
+
             x += 1
+
         else:
+
             break
+
     return video_tensor, fps
 
 
+
+
+
 ###### apply temporal ideal bandpass filter to gaussian video
+
 def temporal_ideal_filter(tensor, low, high, fps, axis=0):
+
     #傅里叶变换，谐波分解分析，tensor维度（帧、宽、高、通道）
+
     fft = fftpack.fft(tensor, axis=axis)
+
     #将图像平移，逆变换时区间对称(-inf,+inf)
+
     frequencies = fftpack.fftfreq(tensor.shape[0], d=1.0 / fps)
+
     bound_low = (np.abs(frequencies - low)).argmin()
+
     bound_high = (np.abs(frequencies - high)).argmin()
+
     fft[:bound_low] = 0
+
     fft[bound_high:-bound_high] = 0
+
     fft[-bound_low:] = 0
+
     iff = fftpack.ifft(fft, axis=axis)
+
     return np.abs(iff)
 
 
+
+
+
 ###### build gaussian pyramid for video
+
 def gaussian_video(video_tensor, levels=3):
+
     for i in range(0, video_tensor.shape[0]):
+
         frame = video_tensor[i]
+
         pyr = build_gaussian_pyramid(frame, level=levels)
+
         gaussian_frame = pyr[-1]
+
         if i == 0:
+
             vid_data = np.zeros((video_tensor.shape[0], gaussian_frame.shape[0], gaussian_frame.shape[1], 3))
+
         vid_data[i] = gaussian_frame
+
     return vid_data
 
 
+
+
+
 ###### amplify the video
+
 def amplify_video(gaussian_vid, amplification=50):
+
     return gaussian_vid * amplification
 
+
+
+
+
 ###### reconstract video from original video and gaussian video
+
 def reconstract_video(amp_video, origin_video, levels=3):
+
     final_video = np.zeros(origin_video.shape)
+
     for i in range(0, amp_video.shape[0]):
+
         img = amp_video[i]
+
         for x in range(levels):
+
             img = cv2.pyrUp(img)
+
         img = img + origin_video[i]
+
         final_video[i] = img
+
     return final_video
 
+
 #######save video to files
+
 def save_video(video_tensor):
+
     fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+
     [height, width] = video_tensor[0].shape[0:2]
+
     writer = cv2.VideoWriter("out.avi", fourcc, 30, (width, height), 1)
+
     for i in range(0, video_tensor.shape[0]):
+
         writer.write(cv2.convertScaleAbs(video_tensor[i]))
+
     writer.release()
+
+
+
 
 
 ###### magnify color
 
+
+
 def magnify_color(video_name, low, high, levels=3, amplification=20):
+
     #载入图片
+
     t, f = load_video(video_name)
+
     gau_video = gaussian_video(t, levels=levels)
+
     #中通滤波
+
     filtered_tensor = temporal_ideal_filter(gau_video, low, high, f)
+
     #放大
+
     amplified_video = amplify_video(filtered_tensor, amplification=amplification)
+
     #重构
+
     final = reconstract_video(amplified_video, t, levels=3)
+
     save_video(final)
 
+
+
+
+
 if __name__ == "__main__":
+
     magnify_color("baby.mp4", 0.4, 3)
 
 
+
+
+
 #十、特征提取
+
 #####（一）、特征提取
+
 1、Harris角点提取
+
 	代码：
+
 	import cv2
+
 	import numpy as np
+
 	video = cv2.VideoCapture(0)
+
 	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3 ))
+
 	while video.isOpened():
+
 		ret, frame = video.read()
+
 		img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
 		img = np.float32(img)
+
 		dst = cv2.cornerHarris(img, 2, 3, 0.04)
+
 		frame[dst > (0.01 * dst.max())] = [0, 0, 255]
 
+
+
 		frame = cv2.dilate(frame, kernel)
+
 		cv2.imshow("frame", frame)
+
 		cv2.waitKey(50)
-2、SIFT（待补充）
+
+2、SIFT、SUFT
 
 
-3、FAST算法（待补充）
+
+
+
+3、FAST算法
+
+
 
 4、BRIF（binary robust independ Elementart features)
+
 [1, 0, 0, 1]
+
 [1, 1, 0, 0]
+
 相同记1，不同记0
+
 海明距离：2
 
+
+
+5、ORB算法
+
+
+
 #####（二）、特征匹配
+
 ######Brute-Force蛮力匹配
+
 查询图->被查询图（使用汉明（海明）距离）
+
 img1 = cv2.imread("1.jpg", 1)
+
 img2 = cv2.imread("2.jpg", 1)
+
 orb = cv2.ORB_create()
+
 kp1, des1 = orb.detectAndCompute(img1, None)
+
 kp2, des2 = orb.detectAndCompute(img2, None)
+
 bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True #pe
+
 matches = bf.match(des1, des2) #匹配
+
 matches = sorted(matches, key = lambda x:x.distance)#排序，每一个特征都是一个向量，将向量与向量进行对比，选择距离最近的10个向量
+
+
+
 img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches[:10], None)
+
 cv2.imshow("img3", img3)
+
+
 
 #十一、跟踪算法（自行研究）
 
-#last
-1、sobel、rewitt、拉普拉斯算子之间的区别：
-https://blog.csdn.net/Chaolei3/article/details/79809703
 
-2、canny算法参考：
-https://baike.baidu.com/item/canny%E7%AE%97%E6%B3%95/8439208
+
+
+
+
+
+
+
+#从头再来一次
+
+#opencv的作用:
+
+（1）、加入先验，提高精度；
+
+（2）、为深度学习提供预处理；
+
+（3）、
+
+
+
+#一、基本操作
+
+1、图像读取
+
+	img = cv2.imread("1.jpg" )
+
+	cv2.imshow("img", img)
+
+	cv2.waitKey(0)
+
+
+
+2、创建纯色图片
+
+	img = np.empty((200, 100, 3), np.uint8)
+
+	img[..., 0] = 255
+
+	img[..., 1] = 0
+
+	img[..., 2] = 0
+
+	img = img[:,:,::-1]
+
+	cv2.imshow("img", img)
+
+	cv2.waitKey(0)
+
+
+
+3、色彩空间
+
+	HSV:H(色彩)[0, 179],s(饱和度)[0, 255], v(亮度)[0, 255]
+
+	
+
+	提取某一不规则区域：
+
+	img = cv2.imread("1.jpg", 1)
+
+	img2 = cv2.imread("2.jpg", 1)
+
+	img = cv2.resize(img, (228, 228))
+
+
+
+	img2 = cv2.resize(img2, (228, 228))
+
+	hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+
+
+	lower = np.array([0, 10, 100])
+
+	upper = np.array([170, 250, 200])
+
+	mask = cv2.inRange(hsv, lower, upper)
+
+	print(mask)
+
+	res = cv2.bitwise_and(img2, img2, mask=mask) #src1与src2然后乘以mask保留像素值不变只取相乘后得到的区域
+
+	res1 = cv2.bitwise_or(img2, img2, mask=mask)
+
+
+
+	print(res.shape)
+
+	cv2.imshow("res1", res1)
+
+	cv2.imshow("res", res)
+
+	cv2.waitKey(0)
+
+
+
+ 3、二值化
+
+ 	①简单二值化：
+
+ 	img1 = cv2.imread("1.jpg", 0)
+
+	ret, img1 = cv2.threshold(img1, 0, 255, 					   cv2.THRESH_BINARY|cv2.THRESH_OTSU)
+
+	cv2.imshow("img1", img1)
+
+	cv2.waitKey(0)
+
+	②自适应二值化：
+
+		Adaptive Method:指定计算阈值的方法
+
+		cv2.ADPTIVE_THRESH_MEAN_C:阈值取自相邻区域的平均值
+
+		cv2.ADPTIVE_THRESH_GAUSSIAN_C:阈值取自相邻区域的加权和，权重为一个高斯窗口
+
+		Block Size 邻域的大小
+
+		C：常数，阈值=平均值或加权平均值 - C
+
+ 	#自适应二值化:需要使用灰度图
+
+	img1 = cv2.imread("3.jpg", 0)
+
+	meanimg = cv2.adaptiveThreshold(img1,   255, cv2.ADAPTIVE_THRESH_MEAN_C,  cv2.THRESH_BINARY, 11, 2)
+
+	gaussian = cv2.adaptiveThreshold(img1,  255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11, 2)
+
+	cv2.imshow("mean", meanimg)
+
+	cv2.imshow("gaussian", gaussian)
+
+	cv2.waitKey(0)
+
+ 4、几何图形
+
+	#几何图形
+
+	img = cv2.imread("1.jpg", 1)
+
+	#线
+
+	cv2.line(img, (0, 0), (100, 100), color=(0, 255, 0), thickness=3)
+
+	#圆
+
+	cv2.circle(img, (100, 100), 100, color=(0, 255, 0), thickness=3)
+
+	#矩形
+
+	cv2.rectangle(img, (100, 100), (200, 200), color=(0, 255, 0),thickness=3)
+
+	#椭圆, 轴（横轴，纵轴）
+
+	cv2.ellipse(img, center=(100, 100), axes=(100, 50), angle=0, startAngle=0, endAngle=360, color=(0, 0, 255))
+
+	#多边形
+
+	point = np.array([[10, 5], [10, 20],[30, 40], [100, 100]], np.int32)
+
+	point = point.reshape(( 1, -1, 2))
+
+	cv2.polylines(img, point, True, color=(255, 0, 0), thickness=3)
+
+
+
+	#写文字
+
+	font = cv2.FONT_HERSHEY_SIMPLEX
+
+	cv2.putText(img, "beautiful", (10, 30), font, 1, color=(0, 0, 255), thickness=3)
+
+
+
+#二、变换
+
+ 1、几何变换
+
+	h, w, c = img.shape
+
+	#插值，线性插值
+
+	dst = cv2.resize(img, (w*2, h*2), interpolation=cv2.INTER_LINEAR)
+
+	#换轴行列变换
+
+	dst = cv2.transpose(img)
+
+	#镜像翻转
+
+	dst = cv2.flip(img, 0)
+
+	cv2.imshow("img", dst)
+
+	cv2.imshow("img1", img)
+
+	cv2.waitKey(0)
+
+	
+
+ 2、仿射变换
+
+ 	img = cv2.imread("1.jpg", 1)
+
+	M = np.array([[1, 0, 50],
+
+				  [0, 1, 50]], np.float32)
+
+	h, w, c = img.shape
+
+	M = cv2.getRotationMatrix2D((w, h), 45, 0.7)
+
+	dst = cv2.warpAffine(img,M, (w, h ))
+
+	cv2.imshow("dst", dst)
+
+	cv2.waitKey(0)
+
+	
+
+ 3、透视变换
+
+ 	#透视变换
+
+	img = cv2.imread("1.jpg", 1)
+
+	h, w, c = img.shape
+
+	dst = np.float32([[0, 0], [h, 0], [0, w],  [h, w]])
+
+	src = np.float32([[10, 10], [100, 10],[10, 100], [100, 100]])
+
+	M = cv2.getPerspectiveTransform(src, dst)
+
+	img = cv2.warpPerspective(img, M, (w, h))
+
+	cv2.imshow("img", img)
+
+	cv2.waitKey(0)
+
+#三、形态学操作
+
+	img = cv2.imread("1.jpg")
+
+	#创建核
+
+	kernel = cv2.getStructuringElement(cv2.MORPH_OPEN, (11, 11))
+
+	#膨胀：将像素值大的像素值赋值给邻域（实际不是这样的，只是这样好理解）
+
+	dst = cv2.dilate(img, kernel)
+
+	#腐蚀：将像素值低的像素赋值给邻域（实际不是这样的，只是这样好理解）
+
+	erode = cv2.erode(img, kernel)
+
+	#开操作：先腐蚀后膨胀，去掉高亮噪点
+
+	opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+
+	#闭操作：先膨胀后腐蚀，去掉低亮噪点
+
+	close = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+
+	#黑帽操作：提取低亮噪点，blackhat = close(src) - src
+
+	blackhat = cv2.morphologyEx(img, cv2.MORPH_BLACKHAT, kernel)
+
+	#顶帽或礼帽操作：提取高亮噪点，tophat = open(src) - src
+
+	tophat = cv2.morphologyEx(img, cv2.MORPH_TOPHAT, kernel)
+
+	#梯度操作：用来提取轮廓，gradient = dilate(src) - erode(src)
+
+	gradient = cv2.morphologyEx(img, cv2.MORPH_GRADIENT, kernel)
+
+	dst_erode = dst - erode
+
+	cv2.imshow("dst", dst)
+
+	cv2.imshow("img", img)
+
+	cv2.imshow("erode", erode)
+
+	cv2.imshow("dst_erode", dst_erode)
+
+	cv2.imshow("opening", opening)
+
+	cv2.imshow("black", black)
+
+	cv2.waitKey(0)
+
+#四、图像混合
+
+	#图片相加
+
+	img1 = cv2.imread("1.jpg", 1)
+
+	img2 = cv2.imread("2.jpg", 1)
+
+	img1 = cv2.resize(img1, (100, 100), interpolation=cv2.INTER_LINEAR)
+
+	img2 = cv2.resize(img2, (100, 100))
+
+	dst2 = cv2.addWeighted(img1, 0.3, img2, 0.7, 0)
+
+	dst = cv2.add(img1, img2)
+
+	cv2.imshow("img1", dst2)
+
+	cv2.waitKey(0)
+
+	#添加水印
+
+	#添加水印
+
+	img1 = cv2.imread("1.jpg", 1)
+
+	img2 = cv2.imread("9.jpg", 1)
+
+	#灰度图
+
+	img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+
+	#二值图
+
+	ret, img2_gray_binary = cv2.threshold(img2_gray, 0, 255, cv2.THRESH_BINARY|cv2.THRESH_OTSU)
+
+	#二值图像素反转
+
+	img2_gray_binary_black = cv2.bitwise_not(img2_gray_binary)
+
+	#按位与
+
+	dst = cv2.bitwise_and(img1, img1, mask=img2_gray_binary_black)
+
+	dst3 = cv2.bitwise_and(img2, img2, mask=img2_gray_binary)
+
+	#图像混合
+
+	dst4 = cv2.add(dst, dst3)
+
+	cv2.imshow("dst4", dst4)
+
+	cv2.waitKey(0)
+
+#五、图像均衡
+
+	#直方图
+
+	#图像均衡
+
+	img = cv2.imread("1.jpg", 0)
+
+	#统计直方图每个像素值数量
+
+	datasrc = cv2.calcHist([img],[0], mask=None, histSize=[250], ranges=[0, 255])
+
+	plt.plot(datasrc, label="datasrc", color="r")
+
+	#直方图均衡化：使图像细节更加清晰
+
+	# img_equal = cv2.equalizeHist(img)
+
+	# data = cv2.calcHist([img_equal],[0], mask=None, histSize=[250], ranges=[0, 255])
+
+	clahe = cv2.createCLAHE(clipLimit=2, tileGridSize=(8 ,8 ))
+
+	img_clahe = clahe.apply(img)
+
+	data_clahe = cv2.calcHist([img_clahe],[0], mask=None, histSize=[250], ranges=[0, 255])
+
+	plt.plot(data_clahe, label="data_clahe", color="b")
+
+	plt.show()
+
+#六、滤波
+
+	#均值滤波：cv2.blur()
+
+	img = cv2.imread("1.jpg")
+
+	img1 = cv2.blur(img, (3, 3))
+
+	img2 = cv2.medianBlur(img,  3)
+
+	#双边滤波：cv2.bilaterFilter()
+
+	img3 = cv2.bilateralFilter(img, 9, 75, 75)
+
+	#中值滤波：cv2.medianblur()
+
+	img4 = cv2.medianBlur(img, 3)
+
+	#高斯滤波：cv2.gaussianblur()
+
+	img5 = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0)
+
+	#普通提取轮廓
+
+	kernel = np.float32([[1, 1, 0],
+
+						 [1, 0, -1],
+
+						 [0, -1, -1]])
+
+	#拉普拉斯高通滤波：锐化
+
+	kernel  = np.float32([[0, -1, 0],
+
+						  [-1, 5, -1],
+
+						  [0, -1, 0]])
+
+	img6 = cv2.filter2D(img, -1, kernel=kernel)
+
+	#USM锐化：高斯滤波（模糊），然后加权相加
+
+	imgblur = cv2.GaussianBlur(img, (3, 3), 0)
+
+	img7 = cv2.addWeighted(img, 2, imgblur, -1, 0)
+
+	cv2.imshow("img1", img1)
+
+	cv2.imshow("img2", img2)
+
+	cv2.imshow("img3", img3)
+
+	cv2.imshow("img4", img4)
+
+	cv2.imshow("img4", img4)
+
+	cv2.imshow("img6", img7)
+
+	cv2.waitKey(0)
+
+
+
+#七、金字塔
+
+
+
+	#高斯金字塔：
+
+	img = cv2.imread("1.jpg")
+
+	img1 = cv2.GaussianBlur(img, (3, 3), 0)
+
+	#高斯金字塔
+
+	dst = cv2.pyrDown(img1)
+
+	dst1 = cv2.pyrUp(dst)
+
+	#拉普拉斯金字塔
+
+	dst2 = cv2.subtract(img, dst1)
+
+	dst3 = cv2.convertScaleAbs(dst2, alpha=5)
+
+	cv2.imshow("dst", dst3)
+
+	cv2.waitKey(0)
+
+	
+
+#八、模板匹配
+
+	#被查找图片
+
+	img1 = cv2.imread("1.jpg")
+
+	#模板
+
+	template = cv2.imread("2.jpg")
+
+	h, w, c = template.shape
+
+	#模板匹配
+
+	res = cv2.matchTemplate(img1, template, cv2.TM_CCOEFF)
+
+	#max_loc为左上角坐标(x, y)
+
+	min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+
+	#右下角坐标
+
+	botton_right = (max_loc[0]+w,  max_loc[1]+h)
+
+	cv2.rectangle(img1,max_loc, botton_right, color=(255, 0, 0), thickness=3)
+
+	cv2.imshow("img", img1)
+
+	cv2.waitKey(0)
+
+#九、边缘与轮廓
+
+	Sobel\Scharr\Laplacian梯度滤波器
+
+![ec456688cd72293e0a14121c7f8c540.png](.\images\ec456688cd72293e0a14121c7f8c540.png)
+
+	laplacian算子：kernel = [[0, 1, 0],	
+
+							[1,- 4, 1],
+
+							[0, 1, 0]]
+
+								lapulasi锐化：
+
+								[[0, -1, 0],
+
+								[-1, 5, -1],
+
+								[0, -1, 0]]
+
+	canny轮廓提取：
+
+	#canny算法，提取轮廓
+
+	img = cv2.imread("0004.jpg", 1)
+
+	# print(img)cv
+
+	img = cv2.resize(img, (600, 600))
+
+	cv2.imshow("img", img)
+
+	img1 = cv2.convertScaleAbs(img, alpha=2)
+
+	imgblur = cv2.GaussianBlur(img1, (3, 3), sigmaX=0)
+
+	#参数2，3 = 双边阈值最大最小值
+
+	contour = cv2.Canny(imgblur, 230, 270)
+
+	cv2.imshow("contour", contour)
+
+	cv2.waitKey(0)
+
+	
+
+
+
+	#查找轮廓
+
+	#查找轮廓
+
+	img = cv2.imread("13.jpg", 1)
+
+	img = cv2.resize(img, (600, 600))
+
+	imggray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+	ret, binary = cv2.threshold(imggray, 0, 255, cv2.THRESH_BINARY|cv2.THRESH_OTSU)
+
+	#查找轮廓
+
+	contour,_ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+	#将所有点画到原图
+
+	# image = cv2.drawContours(img, contour, -1, color=(0, 255, 0), thickness=1)
+
+	#contour三维数据，因此要降维度
+
+	# M = cv2.moments(contour[0])
+
+	#椭圆拟合
+
+	#contour属于list，
+
+	ellipse = cv2.fitEllipse(contour[0])
+
+	# print(ellipse)
+
+	# exit()
+
+	cv2.ellipse(img, ellipse, (255, 0, 0), 2)
+
+	#直线拟合
+
+	h, w, c = img.shape
+
+	[vx, vy, x, y] = cv2.fitLine(contour[0], cv2.DIST_L2, 0, 0.01, 0.01)
+
+	k = vx/vy
+
+	b = y - k * x
+
+	x1 = x-w//2
+
+	y1 = k*(x1) + b
+
+	cv2.line(img, (int(x1), int(y1)), (int(x), int(y)), color=(255, 0, 0), thickness=3)
+
+	#近似轮廓
+
+	approx = cv2.approxPolyDP(contour[0], epsilon=10, closed=True)
+
+	dst = cv2.drawContours(img, [approx], -1, color=(0, 255, 0), thickness=3)
+
+	cv2.imshow("dst", dst)
+
+	#重心
+
+	# cx, cy = int(M['m10']/M['m00']), int(M['m01'] / M['m00'])
+
+	# print(cx, cy)
+
+	#面积
+
+	area = cv2.contourArea(contour[0])
+
+	#周长
+
+	cv2.arcLength(contour[0], True)
+
+	# cv2.imshow("img", image)
+
+	cv2.waitKey(0)
+
+	
+
+	#近似轮廓
+
+#十、形状匹配
+
+	#形状匹配
+
+	img1 = cv2.imread("1.jpg", 0)
+
+	img2= cv2.imread("2.jpg", 0)
+
+	contour1,_ = cv2.findContours(img1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+	contour2,_ = cv2.findContours(img2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+	res = cv2.matchShapes(contour1[0], contour2[0], 1, 0)
+
+	print(res)
+
+	#模板匹配
+
+	img1 = cv2.imread("1.jpg")
+
+	template = cv2.imread("2.jpg")
+
+	h, w, c = template.shape
+
+	res = cv2.matchTemplate(img1, template, cv2.TM_CCOEFF)
+
+	#max_loc为左上角坐标(x, y)
+
+	min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+
+	#右下角坐标
+
+	botton_right = (max_loc[0]+w,  max_loc[1]+h)
+
+	cv2.rectangle(img1,max_loc, botton_right, color=(255, 0, 0), thickness=3)
+
+	cv2.imshow("img", img1)
+
+	cv2.waitKey(0)
+
+
+
+#十一、Hough变换
+
+#hough变换
+
+	img = cv2.imread("1.jpg", 0)
+
+	ret, binary = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU|cv2.THRESH_BINARY)
+
+	edges = cv2.Canny(binary, 100, 150)
+
+	lines = cv2.HoughLines(edges, 1, np.pi/180, 100)
+
+	for i in lines:
+
+		rho, theta = i
+
+		a = np.cos(theta)
+
+		b = np.sin(theta)
+
+		x0 = a *rho
+
+		y0 = b * rho
+
+		x1 = int(x0 + 1000*(-b))
+
+		y1 = int(y0 + 1000*(a))
+
+		x2 = int(x0 - 1000*(-b))
+
+		y2 = int(y0 - 1000*(a))
+
+		cv2.line(img, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=3)
+
+
+
+	cv2.imshow("img", img)
+
+	
+
+#傅里叶变换
+
+#欧拉放大
+
+#角点检测
+
+	1、Harris角点检测
+
+	#harris角点检测：缺点对于局部变化率较小但是整体变化率小的的位置检测效果差
+
+	img2 = cv2.imread("1.jpg", 1)
+
+	imggray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+
+	imgfloat = np.float32(imggray)
+
+	dst = cv2.cornerHarris(imgfloat, 2, 3, 0.09)
+
+	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+
+	img2[dst>0.01 * dst.max()] = [0, 0, 255]
+
+	dst = cv2.dilate(dst, kernel)
+
+	cv2.imshow("dst", img2)
+
+	
+
+	2、SIFT角点检测
+
+	harrisim = h
+
+#last
+
+ 1、sobel、rewitt、拉普拉斯算子之间的区别：
+
+	https://blog.csdn.net/Chaolei3/article/details/79809703
+
+
+
+ 2、canny算法参考：
+
+	https://baike.baidu.com/item/canny%E7%AE%97%E6%B3%95/8439208
+
